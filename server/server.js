@@ -2,10 +2,12 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser')
 
 
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 
 // Import controllers
 const controllers = require('./controllers');
@@ -13,14 +15,18 @@ const controllers = require('./controllers');
 // Read tasks from database; return home page
 app.use(express.static('client')) // send all home page files to client
 
-app.get('/git ', controllers.getAllTasks, (req, res) => {
-  response = 'server says hi'
-  console.log(response)
-  return res.status(200).send(response); // send back data received from server
+
+app.get('/allItems', controllers.getAllTasks, controllers.setCookie, (req, res) => {
+  console.log('server processing allItems...')
+  console.log(res.locals.allItems);
+  return res.status(200).send(res.locals.allItems); // send back data received from server
 });
 
 // [AFS] Add routes to handle create, update, delete
-
+app.post('/newItem', controllers.createNewTask, (req, res) => {
+  console.log(res.locals.newItem);
+  return res.status(200).send(res.locals.newItem);
+});
 
 // Return 404 for any endpoints not specified above
 app.use('*', (req, res) => res.sendStatus(404));
